@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Value-for-value source-code download page" />
+  <title>Get Source Code - Value for Value</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./config.js"></script>
+</head>
+<body class="bg-gray-950 text-gray-100 flex items-center justify-center min-h-screen font-sans p-4">
+  <main class="bg-gray-900 p-8 rounded-2xl shadow-2xl max-w-md w-full border border-gray-800 text-center">
+    <h1 class="text-2xl font-bold mb-2 text-indigo-400">🚀 Get the Source Code</h1>
+    
+    <!-- Dynamic Asset Name Label -->
+    <div id="projectBadge" class="inline-block bg-indigo-950/70 border border-indigo-700/50 text-indigo-300 text-xs px-3 py-1 rounded-full mb-3 font-mono">
+      Loading asset...
+    </div>
+
+    <p class="text-gray-400 text-sm mb-6">Support open-source development and keep this channel motivated.</p>
+
+    <!-- Main Options -->
+    <div class="space-y-4">
+      <button onclick="showPaymentModal()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-500 font-semibold rounded-xl transition duration-200 shadow-md">
+        ❤️ Keep Me Motivated (Support Rs.1/2/5/10...Rs.50)
+      </button>
+      <button onclick="triggerDownload('free')" class="w-full py-3 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-xl transition duration-200 text-sm border border-gray-700">
+        🤝 I am financially tight right now
+      </button>
+    </div>
+
+    <div id="statusMessage" class="mt-4 text-xs text-gray-400 min-h-[1.5rem]"></div>
+  </main>
+
+  <!-- Payment Modal -->
+  <div id="paymentModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+    <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl shadow-2xl max-w-sm w-full text-center space-y-4 max-h-[90vh] overflow-y-auto">
+      <h3 class="text-xl font-bold text-indigo-400">Support the Creator(Rs.1/2/5/10...Rs.50) ❤️</h3>
+      <p class="text-gray-300 text-xs">Choose your preferred payment method below:</p>
+
+      <!-- UPI Payment Container -->
+      <div class="space-y-3 text-left bg-gray-800/80 p-4 rounded-xl border border-gray-700">
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">India (UPI / GPay / PhonePe)</div>
+
+        <div class="flex flex-col items-center justify-center space-y-2 py-1">
+          <div class="bg-white p-2.5 rounded-xl shadow-md inline-block">
+            <img id="upiQrImage" src="" alt="Scan UPI QR Code" class="w-36 h-36 mx-auto" />
+          </div>
+          <p class="text-[11px] text-gray-400 text-center">Scan with any UPI App (GPay / PhonePe / Paytm)</p>
+        </div>
+
+        <a id="upiDeepLink" href="#" 
+           class="block text-center w-full py-2.5 bg-emerald-600 hover:bg-emerald-500 font-semibold rounded-lg text-white transition text-sm shadow">
+          📱 Pay via UPI App
+        </a>
+
+        <div class="flex items-center justify-between bg-gray-950/70 p-2 rounded-lg border border-gray-700">
+          <span id="upiIdDisplay" class="text-xs font-mono text-gray-200 truncate select-all"></span>
+          <button onclick="copyUpiId()" class="ml-2 px-2.5 py-1 text-xs bg-gray-800 hover:bg-gray-700 text-indigo-300 rounded font-medium transition border border-gray-600">
+            Copy
+          </button>
+        </div>
+        <p id="copyStatus" class="text-[11px] text-emerald-400 text-center hidden">Copied to clipboard!</p>
+      </div>
+
+      <!-- International / Patreon -->
+      <div class="space-y-2 text-left bg-gray-800/80 p-3 rounded-xl border border-gray-700">
+        <div class="text-xs font-semibold text-gray-400 uppercase tracking-wider text-center">International</div>
+        <a id="patreonLink" href="#" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="flex items-center justify-center gap-2 w-full py-2.5 bg-red-600 hover:bg-red-500 font-semibold rounded-lg text-white transition text-sm shadow">
+          🌐 Support via Patreon
+        </a>
+      </div>
+
+      <!-- Actions -->
+      <div class="pt-2 space-y-2">
+        <button onclick="triggerDownload('paid')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 font-semibold rounded-xl text-white transition text-sm shadow">
+          ✅ I've Supported / Continue to Download
+        </button>
+        <button onclick="closePaymentModal()" class="w-full py-1.5 text-xs text-gray-400 hover:text-gray-200 transition">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function getRequestedAsset() {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get('asset') || urlParams.get('project') || '';
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const cfg = window.APP_CONFIG || {};
+      const asset = getRequestedAsset();
+
+      // Update project badge UI
+      const badge = document.getElementById("projectBadge");
+      if (badge) {
+        badge.innerText = asset ? `📦 ${asset}` : "📦 Default Source Code";
+      }
+
+      // Display UPI ID
+      const upiText = document.getElementById("upiIdDisplay");
+      if (upiText) upiText.innerText = cfg.UPI_ID || "";
+
+      // Setup UPI links
+      const pa = encodeURIComponent(cfg.UPI_ID || "");
+      const pn = encodeURIComponent(cfg.PAYEE_NAME || "Creator Support");
+      const tn = encodeURIComponent("Creator Support");
+      const upiUri = `upi://pay?pa=${pa}&pn=${pn}&tn=${tn}&cu=INR&mode=02`;
+
+      const upiLink = document.getElementById("upiDeepLink");
+      if (upiLink) upiLink.href = upiUri;
+
+      const qrImg = document.getElementById("upiQrImage");
+      if (qrImg && cfg.UPI_ID) {
+        qrImg.src = `https://quickchart.io/qr?text=${encodeURIComponent(upiUri)}&size=200&margin=1`;
+      }
+
+      const patreonLink = document.getElementById("patreonLink");
+      if (patreonLink && cfg.PATREON_URL) {
+        patreonLink.href = cfg.PATREON_URL;
+      }
+    });
+
+    function showPaymentModal() {
+      document.getElementById("paymentModal").classList.remove("hidden");
+    }
+
+    function closePaymentModal() {
+      document.getElementById("paymentModal").classList.add("hidden");
+    }
+
+    function copyUpiId() {
+      const cfg = window.APP_CONFIG || {};
+      const upiVal = cfg.UPI_ID || document.getElementById("upiIdDisplay").innerText;
+      navigator.clipboard.writeText(upiVal).then(() => {
+        const status = document.getElementById("copyStatus");
+        status.classList.remove("hidden");
+        setTimeout(() => status.classList.add("hidden"), 2000);
+      });
+    }
+
+    async function triggerDownload(accessType) {
+      const status = document.getElementById("statusMessage");
+      const cfg = window.APP_CONFIG || {};
+      const asset = getRequestedAsset();
+      
+      if (!cfg.API_ENDPOINT) {
+        status.innerText = "API endpoint not configured.";
+        status.className = "mt-4 text-xs text-red-400 min-h-[1.5rem]";
+        return;
+      }
+
+      status.innerText = "Preparing your download...";
+      status.className = "mt-4 text-xs text-indigo-400 min-h-[1.5rem]";
+
+      try {
+        let apiUrl = `${cfg.API_ENDPOINT}?type=${encodeURIComponent(accessType)}`;
+        if (asset) {
+          apiUrl += `&asset=${encodeURIComponent(asset)}`;
+        }
+
+        const response = await fetch(apiUrl);
+        const data = await response.json();
+
+        if (response.ok && data.download_url) {
+          status.innerText = "Download starting...";
+          status.className = "mt-4 text-xs text-emerald-400 min-h-[1.5rem]";
+          window.location.href = data.download_url;
+          closePaymentModal();
+        } else {
+          status.innerText = data.message || "Failed to retrieve download link.";
+          status.className = "mt-4 text-xs text-red-400 min-h-[1.5rem]";
+        }
+      } catch (err) {
+        status.innerText = "Network error. Please try again.";
+        status.className = "mt-4 text-xs text-red-400 min-h-[1.5rem]";
+      }
+    }
+  </script>
+</body>
+</html>
