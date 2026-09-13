@@ -1003,3 +1003,40 @@ The project is now successfully configured with:
 - `frontend` Root Directory
 - Static `index.html` deployment
 - Working production URL
+
+
+---
+
+# Asset Parameter Requirement
+
+This frontend no longer has a default source file. The `asset` query parameter is required.
+
+Valid examples:
+
+```text
+http://localhost:3000/?asset=helloworld.zip
+https://your-domain.vercel.app/?asset=project.zip
+https://your-domain.vercel.app/?asset=document.pdf
+```
+
+Any non-empty asset filename can be passed. The frontend forwards the exact asset value to the configured download API.
+
+If you open the page without `asset`, for example:
+
+```text
+http://localhost:3000/
+```
+
+the page shows **Asset not found** and does not call the download API.
+
+For local testing:
+
+```bash
+vercel dev
+```
+
+Then open:
+
+```text
+http://localhost:3000/?asset=helloworld.zip
+```
