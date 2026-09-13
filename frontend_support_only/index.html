@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Support the creator using UPI or Patreon." />
+  <title>Support the Creator</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="./config.js"></script>
+</head>
+<body class="min-h-screen bg-black text-gray-100 font-sans flex items-center justify-center p-4">
+  <main class="w-full max-w-md rounded-2xl border border-gray-800 bg-gray-900 p-6 text-center shadow-2xl">
+    <h1 class="text-xl sm:text-2xl font-bold text-indigo-400">
+      Support the Creator (INR 5 / INR 10 ... INR 100) ❤️
+    </h1>
+
+    <p class="mt-5 text-xs text-gray-300">
+      Choose your preferred payment method below:
+    </p>
+
+    <!-- India / UPI -->
+    <section class="mt-5 rounded-xl border border-gray-700 bg-gray-800/80 p-4">
+      <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400">
+        India (UPI / GPay / PhonePe)
+      </h2>
+
+      <div class="mt-4 flex flex-col items-center gap-3">
+        <div class="inline-block rounded-xl bg-white p-2.5 shadow-md">
+          <img
+            id="upiQrImage"
+            src=""
+            alt="Scan UPI QR Code"
+            class="h-40 w-40"
+          />
+        </div>
+
+        <p class="text-[11px] text-gray-400">
+          Scan with any UPI App (GPay / PhonePe / Paytm)
+        </p>
+      </div>
+
+      <a
+        id="upiDeepLink"
+        href="#"
+        class="mt-4 block w-full rounded-lg bg-emerald-600 py-3 text-sm font-semibold text-white shadow transition hover:bg-emerald-500"
+      >
+        📱 Pay via UPI App
+      </a>
+
+      <div class="mt-3 flex items-center justify-between rounded-lg border border-gray-700 bg-gray-950/70 p-2">
+        <span
+          id="upiIdDisplay"
+          class="truncate select-all text-xs font-mono text-gray-200"
+        ></span>
+        <button
+          id="copyUpiButton"
+          type="button"
+          class="ml-2 rounded border border-gray-600 bg-gray-800 px-2.5 py-1 text-xs font-medium text-indigo-300 transition hover:bg-gray-700"
+        >
+          Copy
+        </button>
+      </div>
+
+      <p id="copyStatus" class="mt-2 hidden text-center text-[11px] text-emerald-400">
+        Copied to clipboard!
+      </p>
+    </section>
+
+    <!-- International / Patreon -->
+    <section class="mt-4 rounded-xl border border-gray-700 bg-gray-800/80 p-4">
+      <h2 class="text-xs font-semibold uppercase tracking-wider text-gray-400">
+        International
+      </h2>
+
+      <a
+        id="patreonLink"
+        href="#"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-3 flex w-full items-center justify-center gap-2 rounded-lg bg-red-600 py-3 text-sm font-semibold text-white shadow transition hover:bg-red-500"
+      >
+        🌐 Support via Patreon
+      </a>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const cfg = window.APP_CONFIG || {};
+      const upiId = cfg.UPI_ID || "";
+      const payeeName = cfg.PAYEE_NAME || "Creator Support";
+
+      const upiText = document.getElementById("upiIdDisplay");
+      const upiLink = document.getElementById("upiDeepLink");
+      const qrImg = document.getElementById("upiQrImage");
+      const patreonLink = document.getElementById("patreonLink");
+      const copyButton = document.getElementById("copyUpiButton");
+      const copyStatus = document.getElementById("copyStatus");
+
+      upiText.textContent = upiId;
+
+      if (upiId) {
+        const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&tn=${encodeURIComponent("Creator Support")}&cu=INR`;
+        upiLink.href = upiUri;
+        qrImg.src = `https://quickchart.io/qr?text=${encodeURIComponent(upiUri)}&size=220&margin=1`;
+      } else {
+        upiLink.removeAttribute("href");
+        upiLink.classList.add("pointer-events-none", "opacity-50");
+        qrImg.alt = "UPI ID is not configured";
+      }
+
+      if (cfg.PATREON_URL) {
+        patreonLink.href = cfg.PATREON_URL;
+      } else {
+        patreonLink.removeAttribute("href");
+        patreonLink.classList.add("pointer-events-none", "opacity-50");
+      }
+
+      copyButton.addEventListener("click", async () => {
+        if (!upiId) return;
+
+        try {
+          await navigator.clipboard.writeText(upiId);
+          copyStatus.classList.remove("hidden");
+          setTimeout(() => copyStatus.classList.add("hidden"), 2000);
+        } catch {
+          const tempInput = document.createElement("input");
+          tempInput.value = upiId;
+          document.body.appendChild(tempInput);
+          tempInput.select();
+          document.execCommand("copy");
+          tempInput.remove();
+          copyStatus.classList.remove("hidden");
+          setTimeout(() => copyStatus.classList.add("hidden"), 2000);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
